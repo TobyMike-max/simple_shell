@@ -1,13 +1,19 @@
-#include <sys/types.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-int main(void)
+int main(int __attribute__ ((unused)) argc, char *argv[])
 {
-	pid_t pid, ppid;
+	/** 
+	 * Get the second argument of the main function
+	 * Iterate through the array of pointers starting from the second
+	 * Then print all the arguments using %s in printf function
+	 * Stop when you reach a null pointer
+	 */
 
-	pid = getpid();
-	ppid = getppid();
+	int i;
 
-	printf("pid = %u\tppid = %u\n", pid, ppid);
+	for (i = 0; argv[i] != NULL; i++)
+	{
+		printf("%s\n", argv[i]);
+	}
 }
