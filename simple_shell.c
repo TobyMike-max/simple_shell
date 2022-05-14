@@ -19,14 +19,17 @@ int main(int __attribute__((unused)) argc, char __attribute__((unused)) *argv[])
 
 			do 
 			{
-			           printf("Input: ");
+				int int_mode = isatty(STDIN_FILENO);
+				if (int_mode == 1)
+				{
+					write(STDOUT_FILENO, "($) ", 4);
 			           line = get_input();
 				   tokenize = split_input(line);
-				   stats = fork_execve(tokenize);
+				   fork_execve(tokenize);
 				   free(line);
 				   free(tokenize);
-		        }
-			while (stats);
+				}
+		        } while (int_mode);
 
 			return (0);
 }
@@ -38,7 +41,7 @@ char *get_input(void)
 	        char *buffer = NULL;
 		size_t buffer_count = 0;
 
-			        if (getline(&buffer, &buffer_count, stdin) == -1)
+		if (getline(&buffer, &buffer_count, stdin) == -1)
 						        {
 								if (feof(stdin))
 					                {										                        exit(EXIT_SUCCESS);
