@@ -15,7 +15,7 @@ int main(int __attribute__((unused)) argc, char __attribute__((unused)) *argv[])
 {
 	        char *line;
 		        char **tokenize;
-			        int stats;
+			        int int_mode;
 
 			do 
 			{
@@ -43,9 +43,9 @@ char *get_input(void)
 
 		if (getline(&buffer, &buffer_count, stdin) == -1)
 						        {
-								if (feof(stdin))
-					                {										                        exit(EXIT_SUCCESS);
-																	                }
+								if (isatty(STDIN_FILENO) == -1)	                {
+									write(STDOUT_FILENO, "($) ", 4); 
+									exit(EXIT_SUCCESS);	                }
 								else {								                        perror("readline Error:");									 exit(EXIT_FAILURE);											                }
 												        }
 					        /* Returns an array of chracters entered by user */
@@ -104,41 +104,34 @@ char **split_input(char *buffer)
 }
 
 int fork_execve(char **args)
-
 {
-
-	        pid_t pid;
-	 int status;
-			  
-	 pid = fork();
-
-				        /* Child process */
-
-				        if (pid == 0)
-{
-	if (execve(args[0], args, NULL) == -1)
-											                {
-
-														                        perror("Error:");
-
-																	                }
-
-										                /* This only runs if execve function fails */									                exit(EXIT_FAILURE);
+	pid_t pid;
+	int status;
+	
+	if ((args[0] != NULL) || (argv[0] != NULL))
+	{
+		pid = fork();
+	}
+	
+	/* Child process */
+        if (pid == 0)
+	{
+	if ((execve(args[0], args, NULL) == -1) || (execve(argv[0], argv, NULL) == -1))
+	{
+		perror("Error:");
+	}
+	
+	/* This only runs if execve function fails */									                exit(EXIT_FAILURE);
 											        }
 
 					        /* Error forking */
 
 					        else if (pid < 0) {
-
 							perror("Error:");
 					        }
-
-						        /* Parent process */
-
-						        else
-					        {
+     /* Parent process */
+      else
+{
 					                wait(&status);
-					        }
-
-							        return (1);
-								}
+					        }						        return (1);
+}
