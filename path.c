@@ -9,6 +9,7 @@
 int path_execute(char *command, vars_t *vars)
 {
 	pid_t child_pid;
+
 	if (access(command, X_OK) == 0)
 	{
 		child_pid = fork();
@@ -46,7 +47,8 @@ int path_execute(char *command, vars_t *vars)
  */
 char *find_path(char **env)
 {
-	char *path = "PATH=";
+	char *path = "PATH=";	
+
 	unsigned int i, j;
 	for (i = 0; env[i] != NULL; i++)
 	{
@@ -70,6 +72,7 @@ void check_for_path(vars_t *vars)
 	unsigned int i = 0, r = 0;
 	char **path_tokens;
 	struct stat buf;
+
 	if (check_for_dir(vars->av[0]))
 		r = execute_cwd(vars);
 	else
@@ -116,6 +119,7 @@ int execute_cwd(vars_t *vars)
 {
 	pid_t child_pid;
 	struct stat buf;
+
 	if (stat(vars->av[0], &buf) == 0)
 	{
 		if (access(vars->av[0], X_OK) == 0)
@@ -160,6 +164,7 @@ int execute_cwd(vars_t *vars)
 int check_for_dir(char *str)
 {
 	unsigned int i;
+
 	for (i = 0; str[i]; i++)
 	{
 		if (str[i] == '/')
