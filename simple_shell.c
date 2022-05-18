@@ -17,6 +17,7 @@ static void sig_handler(int uuv)
 	else
 		_puts("\n");
 }
+
 /**
  * main - main function for the shell
  * @argc: number of arguments passed to main
