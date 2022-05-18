@@ -1,137 +1,68 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#define TOK_DELIM " \t\r\n\a"
+#include "shell.h"
 
-char* get_input(void);
-char **split_input(char *);
-int fork_execve(char **);
+/* global variable for ^C handling */
+unsigned int sig_flag;
 
-int main(int __attribute__((unused)) argc, char __attribute__((unused)) *argv[])
+/**
+ * sig_handler - handles ^C signal interupt
+ * @uuv: unused variable (required for signal function prototype)
+ *
+ * Return: void
+ */
+static void sig_handler(int uuv)
 {
-	        char *line;
-		        char **tokenize;
-			        int int_mode;
-
-			do 
-			{
-				int int_mode = isatty(STDIN_FILENO);
-				if (int_mode == 1)
-				{
-					write(STDOUT_FILENO, "($) ", 4);
-			           line = get_input();
-				   tokenize = split_input(line);
-				   fork_execve(tokenize);
-				   free(line);
-				   free(tokenize);
-				}
-		        } while (int_mode);
-
-			return (0);
+	(void) uuv;
+	if (sig_flag == 0)
+		_puts("\n$ ");
+	else
+		_puts("\n");
 }
 
-
-
-char *get_input(void)
+/**
+ * main - main function for the shell
+ * @argc: number of arguments passed to main
+ * @argv: array of arguments passed to main
+ * @environment: array of environment variables
+ *
+ * Return: 0 or exit status, or ?
+ */
+int main(int argc __attribute__((unused)), char **argv, char **environment)
 {
-	        char *buffer = NULL;
-		size_t buffer_count = 0;
+	size_t len_buffer = 0;
+	unsigned int is_pipe = 0, i;
+	vars_t vars = {NULL, NULL, NULL, 0, NULL, 0, NULL};
 
-		if (getline(&buffer, &buffer_count, stdin) == -1)
-						        {
-								if (isatty(STDIN_FILENO) == -1)	                {
-									write(STDOUT_FILENO, "($) ", 4); 
-									exit(EXIT_SUCCESS);	                }
-								else {								                        perror("readline Error:");									 exit(EXIT_FAILURE);											                }
-												        }
-					        /* Returns an array of chracters entered by user */
-					        return (buffer);
-}
-
-char **split_input(char *buffer)
-
-{
-	        int buffer_count = 64, position = 0;
-		        char **tokens_array = malloc(sizeof(char *) * buffer_count);
-			        char *token;
-
-				        /* check if allocated memory is NULL */
-
-				        if (!tokens_array)
-						        {
-
-				                fprintf(stderr, "lsh: allocation error\n");
-					 exit(EXIT_FAILURE);
-}
-        token = strtok(buffer, TOK_DELIM);
-
-	        while (token != NULL)
-
-	        {
-
-	           /* Store the address of the first token into the array of pointers */
-			                tokens_array[position] = token;
-
-					                /* Increase the index of the array of pointers */
-
-					                position++;
-
-
-
-							                /* Check if position exceeds allocated space and realloc if true */							                if (position >= buffer_count)
-	 {												                        buffer_count += 64;
-														     tokens_array = realloc(tokens_array, buffer_count * sizeof(char *));
-						if (!tokens_array)															                        {
-		 fprintf(stderr, "lsh: allocation error\n");
-		 exit(EXIT_FAILURE);
-	} 
-	}
-		token = strtok(NULL, TOK_DELIM);
-
-											        }
-
-        /* Sets the last position in the array to NULL */
-
-        tokens_array[position] = NULL;
-
-	        /* Return the address of the array of pointers */
-
-	        return (tokens_array);
-}
-
-int fork_execve(char **args)
-{
-	pid_t pid;
-	int status;
-	
-	if ((args[0] != NULL) || (argv[0] != NULL))
+	vars.argv = argv;
+	vars.env = make_env(environment);
+	signal(SIGINT, sig_handler);
+	if (!isatty(STDIN_FILENO))
+		is_pipe = 1;
+	if (is_pipe == 0)
+		_puts("$ ");
+	sig_flag = 0;
+	while (getline(&(vars.buffer), &len_buffer, stdin) != -1)
 	{
-		pid = fork();
+		sig_flag = 1;
+		vars.count++;
+		vars.commands = tokenize(vars.buffer, ";");
+		for (i = 0; vars.commands && vars.commands[i] != NULL; i++)
+		{
+			vars.av = tokenize(vars.commands[i], "\n \t\r");
+			if (vars.av && vars.av[0])
+				if (check_for_builtins(&vars) == NULL)
+					check_for_path(&vars);
+		free(vars.av);
+		}
+		free(vars.buffer);
+		free(vars.commands);
+		sig_flag = 0;
+		if (is_pipe == 0)
+			_puts("$ ");
+		vars.buffer = NULL;
 	}
-	
-	/* Child process */
-        if (pid == 0)
-	{
-	if ((execve(args[0], args, NULL) == -1) || (execve(argv[0], argv, NULL) == -1))
-	{
-		perror("Error:");
-	}
-	
-	/* This only runs if execve function fails */									                exit(EXIT_FAILURE);
-											        }
-
-					        /* Error forking */
-
-					        else if (pid < 0) {
-							perror("Error:");
-					        }
-     /* Parent process */
-      else
-{
-					                wait(&status);
-					        }						        return (1);
+	if (is_pipe == 0)
+		_puts("\n");
+	free_env(vars.env);
+	free(vars.buffer);
+	exit(vars.status);
 }
