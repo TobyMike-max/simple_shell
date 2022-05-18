@@ -1,4 +1,4 @@
-#include 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1~"shell.h"
+#include "shell.h"
 /**
  * path_execute - executes a command in the path
  * @command: full path to the command
@@ -48,8 +48,8 @@ int path_execute(char *command, vars_t *vars)
 char *find_path(char **env)
 {
 	char *path = "PATH=";
-
 	unsigned int i, j;
+
 	for (i = 0; env[i] != NULL; i++)
 	{
 		for (j = 0; j < 5; j++)
