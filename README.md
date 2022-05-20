@@ -30,12 +30,25 @@ simple_shell is designed to run in the Ubuntu 14.04 LTS linux environment and to
 The simple_shell is designed to execute commands in a similar manner to sh, however with more limited functionality. The development of this shell is ongoing. The below features will be checked as they become available (see man page for complete information on usage):
 
 ## Features
+- [x] Uses the path
+- [x] Implements Builtins
+- [x] Handles Command Line Arguments
+- [x] custom strtok function
+- [x] uses exit status
+- [x] shell continues upon Crtl+C (^C)
+- [x] Handles Comments (#)
+- [x] Handles ;
+- [ ] custom getline type function
+- [ ] handles && and ||
+- [ ] aliases
+- [ ] variable replacement
 
 ## Builtins
 
+
 # Example of Use
 Run the executable in your terminal after compiling
-```
+
 ```
 $ ./hsh
 $ # This is our rendition of the shell
@@ -60,4 +73,4 @@ drwxrwxr-x  8 vagrant vagrant  4096 Jul 19 22:34 .git
 -rw-rw-r--  1 vagrant vagrant  2111 Jul 16 01:10 strfunc.c
 -rw-rw-r--  1 vagrant vagrant   719 Jul 19 21:46 tokenize.c
 ```
-```
+
