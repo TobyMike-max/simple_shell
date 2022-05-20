@@ -44,7 +44,13 @@ The simple_shell is designed to execute commands in a similar manner to sh, howe
 - [ ] variable replacement
 
 ## Builtins
-
+- [x] exit
+- [x] env
+- [x] setenv
+- [x] unsetenv
+- [ ] cd
+- [ ] help
+- [ ] history
 
 # Example of Use
 Run the executable in your terminal after compiling
